@@ -23,7 +23,7 @@ EOTor Engine یک ابزار خط فرمان (TUI) تک‌فایله به زبا
 
 ```bash
 # دانلود فایل
-wget https://raw.githubusercontent.com/YOUR_USERNAME/eotor/main/eotor.py
+wget https://raw.githubusercontent.com/EOAMIR/eotor/main/eotor.py
 
 # اجرا
 sudo python3 eotor.py
