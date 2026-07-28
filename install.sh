@@ -7,7 +7,7 @@ NC='\e[0m'
 
 REPO_RAW="https://raw.githubusercontent.com/EOAMIR/EOTor/main"
 INSTALL_PATH="/usr/local/bin/EOTor"
-TMP_PATH="/tmp/EOTor.py"
+TMP_PATH="/tmp/eotor.py"
 
 if [ "$(id -u)" -ne 0 ]; then
     echo -e "${RED}[-] Please run as root (sudo).${NC}"
@@ -24,10 +24,10 @@ fi
 pip3 install --break-system-packages requests urllib3 >/dev/null 2>&1 || \
 pip3 install requests urllib3 >/dev/null 2>&1 || true
 
-curl -fsSL "${REPO_RAW}/EOTor.py?v=$(date +%s)" -o "${TMP_PATH}"
+curl -fsSL "${REPO_RAW}/eotor.py?v=$(date +%s)" -o "${TMP_PATH}"
 
 if [ ! -s "${TMP_PATH}" ]; then
-    echo -e "${RED}[-] Download failed. Check GitHub repo or file name (EOTor.py).${NC}"
+    echo -e "${RED}[-] Download failed. Check GitHub repo or file name (eotor.py).${NC}"
     exit 1
 fi
 
