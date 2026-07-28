@@ -4,16 +4,16 @@
 
 ![Version](https://img.shields.io/badge/Version-v3.4-blue.svg)
 ![Python](https://img.shields.io/badge/Language-Python-green.svg)
-![Platform](https://img.shields.io/badge/Platform-Linux-orange.svg)
+![Linux](https://img.shields.io/badge/Platform-Linux-orange.svg)
 ![License](https://img.shields.io/badge/License-MIT-red.svg)
 
-**مدیر چندمکانه پراکسی SOCKS5 — نصب خودکار، مدیریت آسان و استقرار سریع**
+**مدیر حرفه‌ای نودهای SOCKS5 مبتنی بر Tor با پشتیبانی از صدها لوکیشن مختلف**
 
-EOTor Engine یک ابزار حرفه‌ای مدیریت نودهای SOCKS5 مبتنی بر Tor است که امکان نصب، مدیریت، مانیتورینگ و کنترل صدها لوکیشن مختلف را از طریق یک رابط کاربری ترمینالی (TUI) فراهم می‌کند.
+EOTor Engine یک ابزار مدیریت و استقرار نودهای SOCKS5 روی Linux است که امکان نصب، مدیریت، مانیتورینگ و کنترل صدها لوکیشن مختلف را از طریق یک رابط کاربری ترمینالی (TUI) فراهم می‌کند.
 
 ---
 
-# ✨ ویژگی‌ها
+# ✨ امکانات
 
 ✅ نصب خودکار تنها با یک دستور
 
@@ -25,17 +25,17 @@ EOTor Engine یک ابزار حرفه‌ای مدیریت نودهای SOCKS5 م
 
 ✅ نمایش IP خروجی هر لوکیشن
 
-✅ سیستم Health Check داخلی
+✅ Health Check داخلی
 
-✅ سیستم Auto Restart
+✅ Auto Restart
 
-✅ سیستم CPU Guardian
+✅ CPU Guardian
 
-✅ نصب و حذف گروهی نودها
+✅ مدیریت گروهی نودها
 
-✅ مدیریت کامل از طریق منوی ترمینال
+✅ نمایش وضعیت کامل سرویس‌ها
 
-✅ بدون نیاز به تنظیمات پیچیده
+✅ رابط کاربری ساده و رنگی
 
 ---
 
@@ -47,7 +47,15 @@ EOTor Engine یک ابزار حرفه‌ای مدیریت نودهای SOCKS5 م
 sudo bash -c "$(curl -sL "https://raw.githubusercontent.com/EOAMIR/EOTor/main/install.sh")"
 ```
 
-پس از پایان نصب، برای اجرای مجدد برنامه از دستور زیر استفاده کنید:
+اگر دستور بالا برای شما اجرا نشد، از لینک جایگزین زیر استفاده کنید:
+
+```bash
+sudo bash -c "$(curl -sL "https://raw.githack.com/EOAMIR/EOTor/main/install.sh")"
+```
+
+> لینک دوم از CDN گیت‌هاب استفاده نمی‌کند و در برخی شبکه‌ها که دسترسی به `raw.githubusercontent.com` محدود است می‌تواند بدون مشکل اجرا شود.
+
+پس از پایان نصب:
 
 ```bash
 sudo eotor
@@ -59,12 +67,12 @@ sudo eotor
 
 | مورد       | توضیحات       |
 | ---------- | ------------- |
-| سیستم‌عامل | Ubuntu 20.04+ |
-| سیستم‌عامل | Debian 10+    |
+| سیستم عامل | Ubuntu 20.04+ |
+| سیستم عامل | Debian 10+    |
 | دسترسی     | Root          |
 | اینترنت    | الزامی        |
 
-تمام وابستگی‌های موردنیاز به‌صورت خودکار توسط نصب‌کننده دریافت و نصب می‌شوند.
+تمام وابستگی‌ها به‌صورت خودکار نصب خواهند شد.
 
 ---
 
@@ -85,7 +93,7 @@ sudo eotor
 
 # ⚙️ Setup & Engine
 
-| گزینه            | توضیح                  |
+| گزینه            | عملکرد                 |
 | ---------------- | ---------------------- |
 | Install Engine   | نصب موتور و وابستگی‌ها |
 | Update System    | بروزرسانی موتور        |
@@ -95,15 +103,13 @@ sudo eotor
 
 # 🌍 Primary Location Modules
 
-بخش اصلی برنامه شامل 50 لوکیشن پرکاربرد است.
-
-پورت‌های:
+50 لوکیشن اصلی روی پورت‌های:
 
 ```text
-9080 → 9129
+9080 - 9129
 ```
 
-نمونه لوکیشن‌ها:
+نمونه کشورها:
 
 * Germany
 * Turkey
@@ -112,11 +118,12 @@ sudo eotor
 * Canada
 * Singapore
 * Japan
-* United Kingdom
-* Finland
-* Ireland
 * Austria
 * Belgium
+* Romania
+* Finland
+* Ireland
+* United Kingdom
 
 و ده‌ها کشور دیگر.
 
@@ -124,20 +131,20 @@ sudo eotor
 
 # 🌎 Extended Location Modules
 
-بیش از 163 لوکیشن اضافه در این بخش قرار دارند.
+بیش از 163 لوکیشن اضافه.
 
 نمونه کشورها:
 
 * Brazil
 * Egypt
 * Afghanistan
+* Pakistan
 * Nigeria
+* Morocco
 * Chile
 * Peru
-* Morocco
-* Pakistan
-* South Africa
 * Mexico
+* South Africa
 
 و بسیاری از کشورهای دیگر.
 
@@ -151,36 +158,55 @@ sudo eotor
 * Stop Modules
 * Restart Modules
 * Remove Modules
-* Start All
-* Stop All
-* Restart All
-* Remove All
+* Start ALL Modules
+* Stop ALL Modules
+* Restart ALL Modules
+* Remove ALL Modules
 
 ---
 
 # 📊 Monitoring & Diagnostics
 
-سیستم مانیتورینگ داخلی شامل:
-
 ### Live Status Table
 
-نمایش وضعیت تمام نودها
+نمایش وضعیت تمامی نودها:
+
+* Running
+* Stopped
+* Installed
+* Not Installed
+
+---
 
 ### Health Check
 
-تست اتصال تمام نودهای فعال
+تست اتصال زنده روی تمام نودهای فعال.
+
+---
 
 ### Relay Density
 
-بررسی تعداد رله‌های موجود برای هر کشور
+نمایش تعداد Exit Relay های هر کشور.
+
+رنگ‌بندی:
+
+🟢 بیش از 10 رله
+
+🟡 بین 3 تا 9 رله
+
+🔴 کمتر از 3 رله
+
+---
 
 ### Exit IP Viewer
 
-نمایش IP خروجی هر نود
+نمایش IP خروجی واقعی هر نود.
+
+---
 
 ### Node Diagnostics
 
-بررسی وضعیت سرویس و لاگ‌ها
+بررسی لاگ‌ها و وضعیت سرویس برای عیب‌یابی.
 
 ---
 
@@ -188,31 +214,33 @@ sudo eotor
 
 ### Deploy Module
 
-استقرار نود با نمایش درصد پیشرفت
+استقرار نود همراه با نمایش درصد پیشرفت.
 
 ### Live IP Panel
 
-نمایش زنده IP خروجی نودها
+نمایش زنده IP خروجی تمامی نودهای فعال.
 
 ### Rotate IP
 
-تغییر IP خروجی نودهای انتخابی
+تغییر IP خروجی نودهای انتخابی.
 
 ---
 
 # 🤖 Automation & Guardian
 
-### Auto Restart
+## Auto Restart
 
-امکان ری‌استارت خودکار ساعتی تمام نودها.
+ایجاد سرویس systemd جهت ری‌استارت خودکار ساعتی تمامی نودها.
 
-### CPU Guardian
+---
 
-نظارت دائمی روی مصرف CPU:
+## CPU Guardian
 
-* بررسی هر 5 دقیقه
+سرویس محافظ مصرف منابع:
+
+* بررسی CPU هر 5 دقیقه
 * توقف خودکار نودهای پرمصرف
-* راه‌اندازی مجدد پس از 1 ساعت
+* راه‌اندازی مجدد خودکار پس از 1 ساعت
 * ثبت کامل رویدادها
 
 ---
@@ -224,13 +252,11 @@ sudo eotor
 | 9080 - 9129 | 50 لوکیشن اصلی     |
 | 9130+       | 163+ لوکیشن گسترده |
 
-تمام نودها روی:
+تمام نودها روی آدرس زیر در دسترس هستند:
 
 ```text
 127.0.0.1:<PORT>
 ```
-
-در دسترس خواهند بود.
 
 ---
 
@@ -248,9 +274,15 @@ README.md
 
 ### 📢 کانال تلگرام
 
+**@IMEOAMIR**
+
 https://t.me/IMEOAMIR
 
+---
+
 ### 👨‍💻 پشتیبانی
+
+**@EOAMIR**
 
 https://t.me/EOAMIR
 
