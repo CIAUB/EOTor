@@ -5,7 +5,6 @@ set -e
 RED='\e[1;31m'
 NC='\e[0m'
 
-REPO_RAW="https://raw.githubusercontent.com/EOAMIR/EOTor/main"
 INSTALL_PATH="/usr/local/bin/EOTor"
 TMP_PATH="/tmp/eotor.py"
 
@@ -24,10 +23,11 @@ fi
 pip3 install --break-system-packages requests urllib3 >/dev/null 2>&1 || \
 pip3 install requests urllib3 >/dev/null 2>&1 || true
 
-curl -fsSL "${REPO_RAW}/eotor.py?v=$(date +%s)" -o "${TMP_PATH}"
+# Download directly from Raw Github URL
+curl -fsSL "https://raw.githubusercontent.com/EOAMIR/EOTor/main/eotor.py?v=$(date +%s)" -o "${TMP_PATH}"
 
 if [ ! -s "${TMP_PATH}" ]; then
-    echo -e "${RED}[-] Download failed. Check GitHub repo or file name (eotor.py).${NC}"
+    echo -e "${RED}[-] Download failed. Check GitHub raw URL.${NC}"
     exit 1
 fi
 
