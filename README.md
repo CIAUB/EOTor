@@ -1,11 +1,17 @@
 <div dir="rtl">
 
-# 🚀 EOTor Engine
+<h1 align="center">🚀 EOTor Engine</h1>
 
-![Version](https://img.shields.io/badge/Version-v3.4-blue.svg)
-![Python](https://img.shields.io/badge/Language-Python-green.svg)
-![Linux](https://img.shields.io/badge/Platform-Linux-orange.svg)
-![License](https://img.shields.io/badge/License-MIT-red.svg)
+<p align="center">
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&pause=1000&color=8B0000&center=true&vCenter=true&width=500&lines=Sharingan-sharp+Routing;Multi-Location+SOCKS5;Silent+Precision" alt="Typing SVG" />
+</p>
+
+<p align="center">
+<img src="https://img.shields.io/badge/Version-v3.4-8B0000.svg" />
+<img src="https://img.shields.io/badge/Language-Python-8B0000.svg" />
+<img src="https://img.shields.io/badge/Platform-Linux-8B0000.svg" />
+<img src="https://img.shields.io/badge/License-MIT-8B0000.svg" />
+</p>
 
 **مدیر حرفه‌ای نودهای SOCKS5 مبتنی بر Tor با پشتیبانی از صدها لوکیشن مختلف**
 
@@ -264,9 +270,16 @@ sudo eotor
 
 ```text
 install.sh
+eotor.py
 README.md
-.gitignore
+LICENSE
 ```
+
+---
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/CIAUB/CIAUB/main/sharingan.jpg" width="500" alt="Sharingan" />
+</p>
 
 ---
 
@@ -274,17 +287,17 @@ README.md
 
 ### 📢 کانال تلگرام
 
-**@IMEOAMIR**
+**@VCIAU_CH**
 
-https://t.me/IMEOAMIR
+https://t.me/VCIAU_CH
 
 ---
 
 ### 👨‍💻 پشتیبانی
 
-**@EOAMIR**
+**@VCIAU**
 
-https://t.me/EOAMIR
+https://t.me/VCIAU
 
 ---
 
