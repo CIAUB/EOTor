@@ -287,17 +287,17 @@ LICENSE
 
 ### 📢 کانال تلگرام
 
-**@VCIAU_CH**
+**@CIAUB_CH**
 
-https://t.me/VCIAU_CH
+https://t.me/CIAUB_CH
 
 ---
 
 ### 👨‍💻 پشتیبانی
 
-**@VCIAU**
+**@CIAUB**
 
-https://t.me/VCIAU
+https://t.me/CIAUB
 
 ---
 
