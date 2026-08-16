@@ -44,13 +44,13 @@ EOTor Engine یک ابزار مدیریت و استقرار نودهای SOCKS5 
 برای نصب EOTor Engine کافی است با دسترسی Root دستور زیر را اجرا کنید:
 
 ```bash
-sudo bash -c "$(curl -sL "https://raw.githubusercontent.com/EOAMIR/EOTor/main/install.sh")"
+sudo bash -c "$(curl -sL "https://raw.githubusercontent.com/CIAUB/EOTor/main/install.sh")"
 ```
 
 اگر دستور بالا برای شما اجرا نشد، از لینک جایگزین زیر استفاده کنید:
 
 ```bash
-sudo bash -c "$(curl -sL "https://raw.githack.com/EOAMIR/EOTor/main/install.sh")"
+sudo bash -c "$(curl -sL "https://raw.githack.com/CIAUB/EOTor/main/install.sh")"
 ```
 
 > لینک دوم از CDN گیت‌هاب استفاده نمی‌کند و در برخی شبکه‌ها که دسترسی به `raw.githubusercontent.com` محدود است می‌تواند بدون مشکل اجرا شود.
