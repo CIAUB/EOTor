@@ -3,15 +3,20 @@
 <h1 align="center">🚀 EOTor Engine</h1>
 
 <p align="center">
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&pause=1000&color=8B0000&center=true&vCenter=true&width=500&lines=Sharingan-sharp+Routing;Multi-Location+SOCKS5;Silent+Precision" alt="Typing SVG" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&pause=1000&color=8B0000&center=true&vCenter=true&width=500&lines=Sharingan-sharp+Routing;Multi-Location+SOCKS5;Silent+Precision;Developed+by+CIAUB" alt="Typing SVG" />
 </p>
 
 <p align="center">
-<img src="https://img.shields.io/badge/Version-v3.4-8B0000.svg" />
+<img src="https://img.shields.io/badge/Developer-CIAUB-8B0000.svg" />
+<img src="https://img.shields.io/badge/Version-v3.5.1-8B0000.svg" />
 <img src="https://img.shields.io/badge/Language-Python-8B0000.svg" />
 <img src="https://img.shields.io/badge/Platform-Linux-8B0000.svg" />
 <img src="https://img.shields.io/badge/License-MIT-8B0000.svg" />
 </p>
+
+**توسعه‌دهنده:** **CIAUB**  
+
+> تمامی حقوق این پروژه متعلق به **CIAUB** است. هرگونه کپی‌برداری، تغییر یا انتشار مجدد باید با ذکر نام توسعه‌دهنده اصلی (CIAUB) انجام شود.
 
 **مدیر حرفه‌ای نودهای SOCKS5 مبتنی بر Tor با پشتیبانی از صدها لوکیشن مختلف**
 
@@ -216,6 +221,16 @@ sudo eotor
 
 ---
 
+### 🔒 IP Leak & Block Check (v3.5.1 جدید)
+
+اسکن همه‌ی نودهای فعال برای سه موضوع امنیتی:
+
+* **Tor Verification** — بررسی اینکه IP خروجی واقعاً یک Tor exit هست (`check.torproject.org/api/ip`)
+* **DNS Leak Check** — تشخیص نشت DNS از طریق Tor (`ipleak.net/json/`)
+* **Blacklist Check** — بررسی بلاک بودن IP در Spamhaus ZEN DNSBL
+
+---
+
 # 🔄 IP & Routing
 
 ### Deploy Module
@@ -280,6 +295,21 @@ LICENSE
 <p align="center">
 <img src="https://raw.githubusercontent.com/CIAUB/CIAUB/main/sharingan.jpg" width="500" alt="Sharingan" />
 </p>
+
+---
+
+---
+
+# 👨‍💻 توسعه‌دهنده (Developer)
+
+| فیلد          | مقدار                                            |
+| ------------- | ------------------------------------------------ |
+| **نام**       | **CIAUB**                                        |
+| **نقش**       | طراح و توسعه‌دهنده اصلی (Original Author)       |
+| **GitHub**    | [github.com/CIAUB](https://github.com/CIAUB)     |
+| **پروژه**     | [github.com/CIAUB/EOTor](https://github.com/CIAUB/EOTor) |
+
+> تمامی حقوق این پروژه متعلق به **CIAUB** است.
 
 ---
 
