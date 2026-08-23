@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# ══════════════════════════════════════════════════════════════════════════════
+#  EOTor Engine — Enterprise Multi-Location SOCKS5 Routing Manager
+# ══════════════════════════════════════════════════════════════════════════════
+#  Developer  : CIAUB
+#  Maintainer : CIAUB
+#  Contact    : https://t.me/CIAUB  |  Channel: https://t.me/CIAUB_CH
+#  GitHub     : https://github.com/CIAUB/EOTor
+#  License    : MIT
+# ══════════════════════════════════════════════════════════════════════════════
+
 import os
 import sys
 import json
@@ -13,27 +23,36 @@ import itertools
 from datetime import datetime
 from collections import OrderedDict
 
+__author__    = "CIAUB"
+__maintainer__ = "CIAUB"
+__license__   = "MIT"
+
 # ══════════════════════════════════════════════════════════════════════════════
-#  ANSI COLOR PALETTE
+#  ANSI COLOR PALETTE — CRIMSON RED THEME
 # ══════════════════════════════════════════════════════════════════════════════
 class C:
-    CYAN   = '\033[1;36m'
-    GREEN  = '\033[1;32m'
-    YELLOW = '\033[1;33m'
-    RED    = '\033[1;31m'
-    PURPLE = '\033[1;35m'
-    BLUE   = '\033[1;34m'
-    WHITE  = '\033[1;37m'
-    DIM    = '\033[2m'
-    BOLD   = '\033[1m'
-    RESET  = '\033[0m'
+    # All non-utility colors are mapped to red shades for a unified crimson theme.
+    CYAN   = '\033[1;31m'   # bright red (borders/headers)
+    GREEN  = '\033[1;31m'   # bright red
+    YELLOW = '\033[1;31m'   # bright red
+    RED    = '\033[1;31m'   # bright red (primary)
+    PURPLE = '\033[1;31m'   # bright red
+    BLUE   = '\033[1;31m'   # bright red
+    WHITE  = '\033[1;37m'   # bright white (menu option text — readable on dark bg)
+    DIM    = '\033[2;31m'   # dim red (muted text)
+    BOLD   = '\033[1m'      # bold modifier
+    RESET  = '\033[0m'      # reset
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  BRANDING
 # ══════════════════════════════════════════════════════════════════════════════
-BRAND_NAME    = "EOTor Engine"
-BRAND_VERSION = "v3.4"
-BRAND_TAGLINE = "Enterprise Multi-Location Routing Manager"
+BRAND_NAME       = "EOTor Engine"
+BRAND_VERSION    = "v3.5.1"
+BRAND_TAGLINE    = "Enterprise Multi-Location Routing Manager"
+BRAND_DEVELOPER  = "CIAUB"
+BRAND_CONTACT    = "https://t.me/CIAUB"
+BRAND_CHANNEL    = "https://t.me/CIAUB_CH"
+BRAND_GITHUB     = "https://github.com/CIAUB/EOTor"
 
 # ── Filesystem path mapping (internal paths stay unchanged; only display changes) ──
 # Internal paths used by the underlying runtime:
@@ -334,6 +353,7 @@ def _print_logo():
     print(f"{C.RESET}")
     tagline = f"  {BRAND_TAGLINE}"
     print(f"{C.DIM}{tagline}{C.RESET}")
+    print(f"  {C.DIM}Developed by {BRAND_DEVELOPER}{C.RESET}")
     print()
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -689,7 +709,7 @@ def _menu_row(num_str, text, color=None):
     visible = 4 + len(label) + 1 + len(text)
     pad     = max(73 - visible, 1)
     return (f"{C.CYAN}║{C.RESET}    {color}{label}{C.RESET} "
-            f"{text}{' ' * pad}{C.CYAN}║{C.RESET}")
+            f"{C.WHITE}{text}{C.RESET}{' ' * pad}{C.CYAN}║{C.RESET}")
 
 def _menu_section(title, color):
     visible = 2 + len(title)
@@ -784,7 +804,8 @@ def show_submenu_5():
     print(_menu_row("2", "Health check (connectivity test)"))
     print(_menu_row("3", "Refresh relay density counters"))
     print(_menu_row("4", "Show current exit IP per location"))
-    print(_menu_row("5", "Diagnose a problem module"))
+    print(_menu_row("5", "IP leak & block check (Tor verify / DNS leak / blacklist)"))
+    print(_menu_row("6", "Diagnose a problem module"))
     print(_menu_blank())
     print(_menu_row("0", "← Back"))
     print(f"{C.CYAN}╚{'═' * 73}╝{C.RESET}")
@@ -1598,6 +1619,203 @@ def health_check():
     input(f"\n{C.DIM}  Press Enter...{C.RESET}")
 
 # ══════════════════════════════════════════════════════════════════════════════
+#  IP LEAK & BLOCK CHECK
+#  For every active Tor node:
+#    - verifies the exit IP is genuinely a Tor exit (check.torproject.org)
+#    - checks for DNS leak (ipleak.net JSON API)
+#    - checks Spamhaus DNSBL for blacklisting
+# ══════════════════════════════════════════════════════════════════════════════
+def _tor_verify_exit(port: int, expected_ip: str) -> bool:
+    """Verify the exit IP is a Tor exit node by calling check.torproject.org."""
+    try:
+        r = run_out(
+            f"curl -s -m 12 --socks5-hostname 127.0.0.1:{port} "
+            f"https://check.torproject.org/api/ip"
+        )
+        if r.returncode == 0 and r.stdout.strip():
+            data = json.loads(r.stdout.strip())
+            is_tor = bool(data.get("IsTor"))
+            api_ip = data.get("IP", "")
+            # Both flags must agree: API must say Tor AND IP must match what we saw
+            return is_tor and (api_ip == expected_ip)
+    except Exception:
+        pass
+    return False
+
+
+def _dns_leak_check(port: int, exit_ip: str) -> tuple:
+    """
+    Return (leaked: bool, info: str).
+    Compares DNS resolver IPs reported by ipleak.net against the Tor exit IP.
+    If the DNS resolver IP matches the exit IP → traffic stayed inside Tor.
+    If it returns a foreign DNS (e.g. 8.8.8.8) → DNS leak.
+    """
+    try:
+        r = run_out(
+            f"curl -s -m 12 --socks5-hostname 127.0.0.1:{port} "
+            f"https://ipleak.net/json/"
+        )
+        if r.returncode == 0 and r.stdout.strip():
+            data = json.loads(r.stdout.strip())
+            dns_ips = data.get("dns", {}).get("ip", []) or []
+            if not dns_ips:
+                return False, "no resolver info"
+            # If exit IP itself appears in the DNS list → no leak
+            if exit_ip in dns_ips:
+                return False, "ok"
+            # Otherwise a foreign resolver leaked through
+            sample = dns_ips[0]
+            return True, f"resolver {sample}"
+    except Exception:
+        pass
+    # On any error, treat as unknown → don't flag as leak (avoid false positives)
+    return False, "check failed"
+
+
+def _blacklist_check(ip: str) -> tuple:
+    """
+    Return (listed: bool, source: str).
+    Uses Spamhaus ZEN (combined CSS/SBL/XBL/PBL) via DNS lookup.
+    Listed IPs resolve to 127.0.0.0/24 from the blocklist zone.
+    """
+    try:
+        parts  = ip.split(".")
+        rev_ip = ".".join(reversed(parts))
+        r = run_out(f"dig +short +time=5 +tries=1 {rev_ip}.zen.spamhaus.org")
+        if r.returncode == 0 and r.stdout.strip():
+            out = r.stdout.strip()
+            if "127.0.0" in out:
+                code = out.splitlines()[0].strip()
+                return True, f"Spamhaus ZEN ({code})"
+        return False, ""
+    except Exception:
+        return False, ""
+
+
+def check_ip_leak_and_block():
+    """Scan all active Tor nodes for blacklist, DNS leak, and Tor verification."""
+    os.system("clear")
+    draw_dashboard()
+    print(f"\n  {C.CYAN}🔒  IP LEAK & BLOCK CHECK{C.RESET}\n")
+
+    running = {nid: d for nid, d in ALL_LOCATIONS.items()
+               if node_is_running(d["iso"])}
+    if not running:
+        print(f"  {C.RED}✘  No active modules to scan.{C.RESET}")
+        input(f"\n{C.DIM}  Press Enter...{C.RESET}")
+        return
+
+    print(f"  {C.DIM}Scanning {len(running)} active module(s) — this may take ~30s.{C.RESET}")
+    print(f"  {C.DIM}  • Tor verification : check.torproject.org/api/ip{C.RESET}")
+    print(f"  {C.DIM}  • DNS leak check   : ipleak.net/json/{C.RESET}")
+    print(f"  {C.DIM}  • Blacklist check  : Spamhaus ZEN DNSBL{C.RESET}\n")
+
+    print(f"  {'#':>4}  {'Location':<22}  {'Exit IP':<16}  "
+          f"{'Tor':<4}  {'DNS':<4}  Blacklist")
+    print(f"  {'─' * 78}")
+
+    results = []
+
+    def _scan(nid, d):
+        iso   = d["iso"]
+        port  = d["port"]
+        name  = d["name"]
+        flag  = _flag(iso)
+        res   = {
+            "nid": nid, "iso": iso, "name": name, "flag": flag,
+            "ip": None, "is_tor": False, "dns_leak": False,
+            "dns_info": "", "blacklisted": False, "bl_info": ""
+        }
+
+        ip = get_node_exit_ip(port, timeout=15)
+        res["ip"] = ip
+        if not ip:
+            return res
+
+        # 1. Tor verification
+        res["is_tor"] = _tor_verify_exit(port, ip)
+
+        # 2. DNS leak check
+        leaked, info = _dns_leak_check(port, ip)
+        res["dns_leak"] = leaked
+        res["dns_info"] = info
+
+        # 3. Blacklist check (no need to proxy — IP is already known)
+        listed, src = _blacklist_check(ip)
+        res["blacklisted"] = listed
+        res["bl_info"] = src
+
+        return res
+
+    # Parallel scan — 3 network calls per node, cap workers to avoid rate limits
+    with concurrent.futures.ThreadPoolExecutor(max_workers=PARALLEL_WORKERS) as pool:
+        for r in pool.map(
+            lambda item: _scan(item[0], item[1]), running.items()
+        ):
+            results.append(r)
+
+    results.sort(key=lambda x: x["nid"])
+
+    # Display per-node results
+    for r in results:
+        if r["ip"]:
+            ip_disp = r["ip"]
+            tor_disp = (f"{C.GREEN}✔{C.RESET}" if r["is_tor"]
+                        else f"{C.RED}✘{C.RESET}")
+            dns_disp = (f"{C.GREEN}✔{C.RESET}" if not r["dns_leak"]
+                        else f"{C.RED}✘{C.RESET}")
+            if r["blacklisted"]:
+                bl_disp = f"{C.RED}✘ {r['bl_info']}{C.RESET}"
+            else:
+                bl_disp = f"{C.GREEN}clean{C.RESET}"
+        else:
+            ip_disp  = f"{C.RED}unreachable{C.RESET}"
+            tor_disp = f"{C.DIM}-{C.RESET}"
+            dns_disp = f"{C.DIM}-{C.RESET}"
+            bl_disp  = f"{C.DIM}-{C.RESET}"
+
+        print(f"  {r['nid']:>4}  {r['flag']} {r['name']:<20}  "
+              f"{ip_disp:<22}  {tor_disp}     {dns_disp}     {bl_disp}")
+
+    print(f"  {'─' * 78}")
+
+    # Summary
+    total       = len(results)
+    with_ip     = sum(1 for r in results if r["ip"])
+    tor_ok      = sum(1 for r in results if r["ip"] and r["is_tor"])
+    no_leak     = sum(1 for r in results if r["ip"] and not r["dns_leak"])
+    clean_bl    = sum(1 for r in results if r["ip"] and not r["blacklisted"])
+
+    print(f"\n  {C.CYAN}Summary{C.RESET}")
+    print(f"    Active modules      : {C.WHITE}{with_ip}/{total}{C.RESET}")
+    print(f"    Tor verified exits  : "
+          f"{C.GREEN if tor_ok == with_ip else C.YELLOW}{tor_ok}/{with_ip}{C.RESET}")
+    print(f"    No DNS leak         : "
+          f"{C.GREEN if no_leak == with_ip else C.YELLOW}{no_leak}/{with_ip}{C.RESET}")
+    print(f"    Blacklist clean     : "
+          f"{C.GREEN if clean_bl == with_ip else C.RED}{clean_bl}/{with_ip}{C.RESET}")
+
+    # Actionable warnings
+    leaks   = [r for r in results if r["ip"] and r["dns_leak"]]
+    blocked = [r for r in results if r["blacklisted"]]
+    not_tor = [r for r in results if r["ip"] and not r["is_tor"]]
+
+    if leaks:
+        print(f"\n  {C.YELLOW}⚠  DNS leak detected on:{C.RESET}")
+        for r in leaks:
+            print(f"      {r['flag']} {r['name']:<22}  {r['dns_info']}")
+    if blocked:
+        print(f"\n  {C.RED}⚠  Blacklisted IPs — consider rotating:{C.RESET}")
+        for r in blocked:
+            print(f"      {r['flag']} {r['name']:<22}  {r['ip']}  {r['bl_info']}")
+    if not_tor:
+        print(f"\n  {C.YELLOW}⚠  Not verified as Tor exits:{C.RESET}")
+        for r in not_tor:
+            print(f"      {r['flag']} {r['name']:<22}  {r['ip']}")
+
+    input(f"\n{C.DIM}  Press Enter...{C.RESET}")
+
+# ══════════════════════════════════════════════════════════════════════════════
 #  AUTO-RESTART  (internal paths unchanged; service names remain compatible)
 # ══════════════════════════════════════════════════════════════════════════════
 AUTO_RESTART_SCRIPT  = "/usr/local/bin/tor-nodes-auto-restart.sh"
@@ -2154,7 +2372,8 @@ def main():
                         print(f"\n  {C.GREEN}✔  Relay density data refreshed{C.RESET}")
                         time.sleep(1)
                     elif sub == "4": show_exit_ips()
-                    elif sub == "5": diagnose_node()
+                    elif sub == "5": check_ip_leak_and_block()
+                    elif sub == "6": diagnose_node()
                     else:
                         print(f"\n  {C.RED}✘  Invalid option{C.RESET}"); time.sleep(1)
 
