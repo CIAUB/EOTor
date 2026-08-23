@@ -14,6 +14,7 @@
 set -e
 
 RED='\e[1;31m'
+GREEN='\e[2;32m'
 NC='\e[0m'
 
 REPO="CIAUB/EOTor"
@@ -22,7 +23,20 @@ INSTALL_PATH="/usr/local/bin/EOTor"
 TMP_PATH="/tmp/eotor.py"
 
 DEVELOPER="CIAUB"
-VERSION_TAG="${1:-}"   # optional: pass a tag (e.g. v3.4) to pin that version
+VERSION_TAG="${1:-}"   # optional: pass a tag (e.g. v3.4 or 3.4) to pin that version
+
+# Accept version from both forms:
+#   bash install.sh 3.4          → $1 = 3.4
+#   bash -c "$(curl ...)" 3.4    → $0 = 3.4 (bash -c name slot)
+#   bash install.sh              → VERSION_TAG stays empty (latest from main)
+if [ -z "${VERSION_TAG}" ] && [[ "${0}" =~ ^[vV]?[0-9]+(\.[0-9]+){1,2}$ ]]; then
+  VERSION_TAG="${0}"
+fi
+
+# Normalize tag: prepend "v" if missing (GitHub tags use v-prefix)
+if [ -n "${VERSION_TAG}" ] && [[ ! "${VERSION_TAG}" =~ ^v ]]; then
+  VERSION_TAG="v${VERSION_TAG}"
+fi
 
 # ── Root check ────────────────────────────────────────────────────────────────
 if [ "$(id -u)" -ne 0 ]; then
@@ -54,6 +68,12 @@ if [ ! -s "${TMP_PATH}" ]; then
   echo -e "${RED}[-] Download failed. Check tag/version or network.${NC}"
   exit 1
 fi
+
+# ── Extract BRAND_VERSION from the downloaded file ───────────────────────────
+INSTALLED_VERSION=$(awk -F'"' '/BRAND_VERSION[[:space:]]*=/{print $2; exit}' "${TMP_PATH}" | sed 's/^v//')
+[ -z "${INSTALLED_VERSION}" ] && INSTALLED_VERSION="unknown"
+
+echo -e "${RED}[+] Version: v${INSTALLED_VERSION}${NC}"
 
 # ── Restore shebang (raw GitHub strips it) ───────────────────────────────────
 if ! head -n 1 "${TMP_PATH}" | grep -q "python"; then
