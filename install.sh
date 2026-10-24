@@ -8,37 +8,30 @@
 #  GitHub     : https://github.com/CIAUB/EOTor
 #  License    : MIT
 #
-#  This installer is intentionally minimal and frozen.
-#  All updates ship inside eotor.py — this file is never touched again.
+#  Installs the whole project (eotor.py + eotor_core/) into /usr/local/lib/eotor
+#  and puts the `EOTor` / `eotor` commands in /usr/local/bin.
+#  Re-run it any time to update.
 # ══════════════════════════════════════════════════════════════════════════════
 set -e
 
 RED='\e[1;31m'
-GREEN='\e[2;32m'
 NC='\e[0m'
 
 REPO="CIAUB/EOTor"
-RAW_BASE="https://raw.githubusercontent.com/${REPO}"
-INSTALL_PATH="/usr/local/bin/EOTor"
-TMP_PATH="/tmp/eotor.py"
+LIB_DIR="${EOTOR_LIB_DIR:-/usr/local/lib/eotor}"
+BIN_DIR="${EOTOR_BIN_DIR:-/usr/local/bin}"
+MARK="# eotor-launcher"
 
-DEVELOPER="CIAUB"
-VERSION_TAG="${1:-}"   # optional: pass a tag (e.g. v3.4 or 3.4) to pin that version
+VERSION_TAG="${1:-}"   # optional: pass a tag (e.g. v4.1 or 4.1) to pin that version
 
-# Accept version from both forms:
-#   bash install.sh 3.4          → $1 = 3.4
-#   bash -c "$(curl ...)" 3.4    → $0 = 3.4 (bash -c name slot)
-#   bash install.sh              → VERSION_TAG stays empty (latest from main)
+# bash -c "$(curl ...)" 4.1  puts the version in $0
 if [ -z "${VERSION_TAG}" ] && [[ "${0}" =~ ^[vV]?[0-9]+(\.[0-9]+){1,2}$ ]]; then
   VERSION_TAG="${0}"
 fi
-
-# Normalize tag: prepend "v" if missing (GitHub tags use v-prefix)
 if [ -n "${VERSION_TAG}" ] && [[ ! "${VERSION_TAG}" =~ ^v ]]; then
   VERSION_TAG="v${VERSION_TAG}"
 fi
 
-# ── Root check ────────────────────────────────────────────────────────────────
 if [ "$(id -u)" -ne 0 ]; then
   echo -e "${RED}[-] Please run as root (sudo).${NC}"
   exit 1
@@ -46,46 +39,55 @@ fi
 
 echo -e "${RED}[*] Installing EOTor...${NC}"
 
-# ── System packages ──────────────────────────────────────────────────────────
-if command -v apt-get >/dev/null 2>&1; then
-  apt-get update -y >/dev/null 2>&1 || true
-  apt-get install -y python3 python3-pip curl >/dev/null 2>&1 || true
+# ── Dependencies ──────────────────────────────────────────────────────────────
+if [ -z "${EOTOR_SKIP_DEPS:-}" ]; then
+  if command -v apt-get >/dev/null 2>&1; then
+    apt-get update -y >/dev/null 2>&1 || true
+    apt-get install -y python3 python3-pip curl tar >/dev/null 2>&1 || true
+  fi
+  pip3 install --break-system-packages requests urllib3 >/dev/null 2>&1 || \
+  pip3 install requests urllib3 >/dev/null 2>&1 || true
 fi
 
-pip3 install --break-system-packages requests urllib3 >/dev/null 2>&1 || \
-pip3 install requests urllib3 >/dev/null 2>&1 || true
-
-# ── Pick source: pinned tag or main branch ────────────────────────────────────
-if [ -n "${VERSION_TAG}" ]; then
-  SOURCE="${RAW_BASE}/${VERSION_TAG}/eotor.py"
+# ── Download the project archive (pinned tag or main branch) ──────────────────
+if [ -n "${EOTOR_ARCHIVE:-}" ]; then
+  SOURCE="${EOTOR_ARCHIVE}"
+elif [ -n "${VERSION_TAG}" ]; then
+  SOURCE="https://github.com/${REPO}/archive/refs/tags/${VERSION_TAG}.tar.gz"
 else
-  SOURCE="${RAW_BASE}/main/eotor.py?v=$(date +%s)"
+  SOURCE="https://github.com/${REPO}/archive/refs/heads/main.tar.gz"
 fi
 
-curl -fsSL "${SOURCE}" -o "${TMP_PATH}"
+WORK="$(mktemp -d)"
+trap 'rm -rf "${WORK}"' EXIT
 
-if [ ! -s "${TMP_PATH}" ]; then
+if ! curl -fsSL "${SOURCE}" -o "${WORK}/src.tar.gz" || ! tar -xzf "${WORK}/src.tar.gz" -C "${WORK}" --strip-components=1 2>/dev/null \
+   || [ ! -f "${WORK}/eotor.py" ] || [ ! -d "${WORK}/eotor_core" ]; then
   echo -e "${RED}[-] Download failed. Check tag/version or network.${NC}"
   exit 1
 fi
 
-# ── Extract BRAND_VERSION from the downloaded file ───────────────────────────
-INSTALLED_VERSION=$(awk -F'"' '/BRAND_VERSION[[:space:]]*=/{print $2; exit}' "${TMP_PATH}" | sed 's/^v//')
+INSTALLED_VERSION=$(awk -F'"' '/BRAND_VERSION[[:space:]]*=/{print $2; exit}' "${WORK}/eotor_core/config.py" | sed 's/^v//')
 [ -z "${INSTALLED_VERSION}" ] && INSTALLED_VERSION="unknown"
-
 echo -e "${RED}[+] Version: v${INSTALLED_VERSION}${NC}"
 
-# ── Restore shebang (raw GitHub strips it) ───────────────────────────────────
-if ! head -n 1 "${TMP_PATH}" | grep -q "python"; then
-  printf '%s\n%s\n' '#!/usr/bin/env python3' "$(cat "${TMP_PATH}")" > "${TMP_PATH}.tmp"
-  mv "${TMP_PATH}.tmp" "${TMP_PATH}"
+# ── Install: replace the library directory, then write the launchers ──────────
+mkdir -p "${LIB_DIR}" "${BIN_DIR}"
+rm -rf "${LIB_DIR:?}/eotor_core"
+cp -r "${WORK}/eotor_core" "${LIB_DIR}/eotor_core"
+cp "${WORK}/eotor.py" "${LIB_DIR}/eotor.py"
+chmod +x "${LIB_DIR}/eotor.py"
+
+for name in EOTor eotor; do
+  printf '#!/bin/sh\n%s\nexec python3 "%s/eotor.py" "$@"\n' "${MARK}" "${LIB_DIR}" > "${BIN_DIR}/${name}"
+  chmod +x "${BIN_DIR}/${name}"
+done
+
+echo -e "${RED}[+] Installed to ${LIB_DIR}${NC}"
+echo -e "${RED}[+] Developer: CIAUB${NC}"
+
+if [ -z "${EOTOR_NO_LAUNCH:-}" ]; then
+  echo -e "${RED}[+] Launching EOTor...${NC}"
+  echo
+  exec "${BIN_DIR}/EOTor"
 fi
-
-mv "${TMP_PATH}" "${INSTALL_PATH}"
-chmod +x "${INSTALL_PATH}"
-
-echo -e "${RED}[+] Installed to ${INSTALL_PATH}${NC}"
-echo -e "${RED}[+] Developer: ${DEVELOPER}${NC}"
-echo -e "${RED}[+] Launching EOTor...${NC}"
-echo
-exec "${INSTALL_PATH}"

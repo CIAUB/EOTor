@@ -8,7 +8,7 @@
 
 <p align="center">
 <img src="https://img.shields.io/badge/Developer-CIAUB-8B0000.svg" />
-<img src="https://img.shields.io/badge/Version-v4.0.0-8B0000.svg" />
+<img src="https://img.shields.io/badge/Version-v4.1.0-8B0000.svg" />
 <img src="https://img.shields.io/badge/Language-Python-8B0000.svg" />
 <img src="https://img.shields.io/badge/Platform-Linux-8B0000.svg" />
 <img src="https://img.shields.io/badge/License-MIT-8B0000.svg" />
@@ -69,6 +69,8 @@ sudo bash -c "$(curl -sL "https://raw.githack.com/CIAUB/EOTor/main/install.sh")"
 ```
 
 > لینک دوم از CDN گیت‌هاب استفاده نمی‌کند و در برخی شبکه‌ها که دسترسی به `raw.githubusercontent.com` محدود است می‌تواند بدون مشکل اجرا شود.
+
+> نصب‌کننده کل پروژه را (به‌صورت آرشیو از `github.com`) در `/usr/local/lib/eotor` نصب می‌کند و دستورهای `EOTor` و `eotor` را می‌سازد. برای به‌روزرسانی همان دستور نصب را دوباره اجرا کنید.
 
 پس از پایان نصب:
 
@@ -279,7 +281,7 @@ sudo eotor
 | ---------------------- | ------------------------------------------------------------- |
 | Batch create           | ساخت کانفیگ همه‌ی ۵۰ لوکیشن اصلی از روی یک اینباند موجود      |
 | Custom create          | ساخت کانفیگ برای لوکیشن‌های انتخابی                           |
-| Sync deployed modules  | افزودن نودهای EOTor که نصب شده‌اند ولی هنوز در پنل نیستند     |
+| Sync deployed modules  | افزودن نودهای EOTor که نصب شده‌اند ولی هنوز در پنل نیستند (شامل لوکیشن‌های گسترده) |
 | Delete                 | حذف همه یا بخشی از کانفیگ‌های EOTor از پنل                    |
 
 برای هر لوکیشن یک اینباند روی پورت پنل، یک Outbound از نوع SOCKS و یک Routing Rule ساخته می‌شود:
@@ -287,6 +289,8 @@ sudo eotor
 ```text
 پورت اینباند پنل: 3031 - 3080   ➔   SOCKS محلی EOTor: 9080 - 9129
 ```
+
+> ساخت دسته‌ای فقط یک‌بار کانفیگ پنل را ذخیره می‌کند (یک ریستارت به‌جای ده‌ها ریستارت). اگر پورت اینباند توسط اینباند دیگری (غیر از EOTor) اشغال باشد، آن لوکیشن رد می‌شود و اینباند شما دست‌نخورده می‌ماند.
 
 > Outbound ها با نام `EoTor-<COUNTRY>` ساخته می‌شوند. کانفیگ‌های قدیمی EZ-Panel (`T.Sin-<COUNTRY>`) هم شناسایی و هنگام حذف پاک می‌شوند.
 
@@ -299,7 +303,7 @@ sudo eotor
 | 9080 - 9129 | 50 لوکیشن اصلی     |
 | 9130+       | 163+ لوکیشن گسترده |
 
-تمام نودها روی آدرس زیر در دسترس هستند:
+تمام نودها فقط روی لوکال‌هاست گوش می‌دهند و از بیرون سرور در دسترس نیستند (نصب‌های قدیمی را از `[1] Setup & Engine ➔ [4] Bind SOCKS to localhost` امن کنید؛ داشبورد هم برای ماژول‌های باز هشدار می‌دهد):
 
 ```text
 127.0.0.1:<PORT>
@@ -311,8 +315,16 @@ sudo eotor
 
 ```text
 install.sh
-eotor.py            ← موتور EOTor + ادغام EZ-Panel (یک فایل)
-tests/test_eotor.py
+eotor.py                  ← نقطه‌ی ورود (launcher)
+eotor_core/
+├── app.py                منوی اصلی و main
+├── config.py             برندینگ، مسیرها و تنظیمات
+├── theme.py · ui.py      رنگ‌ها و ویجت‌های ترمینال
+├── locations.py          جدول ۲۱۳ لوکیشن
+├── system.py · network.py
+├── engine.py · deploy.py · control.py · ips.py
+├── checks.py · automation.py · dashboard.py · report.py
+└── panel/                ادغام EZ-Panel (3X-UI · PasarGuard)
 README.md
 LICENSE
 ```
